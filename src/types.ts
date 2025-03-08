@@ -14,6 +14,11 @@ export interface UserSettings {
   preferredModel: string;
 }
 
+export interface LineContent {
+  text: string;
+  checked?: boolean;
+}
+
 export type OpenAIModel = {
   id: string;
   name: string;
