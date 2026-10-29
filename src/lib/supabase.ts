@@ -14,6 +14,17 @@ export function generateUUID(): string {
   return crypto.randomUUID();
 }
 
+// The app signs every visitor into one Supabase account. Its login comes from
+// .env.local (git-ignored by the *.local rule), never from source.
+function getAppLogin(): { email: string; password: string } {
+  const email = import.meta.env.VITE_NOTEPAD_EMAIL;
+  const password = import.meta.env.VITE_NOTEPAD_PASSWORD;
+  if (!email || !password) {
+    throw new Error('Missing VITE_NOTEPAD_EMAIL or VITE_NOTEPAD_PASSWORD (set them in .env.local)');
+  }
+  return { email, password };
+}
+
 // Initialize authentication
 export async function initializeAuth() {
   try {
@@ -24,16 +35,17 @@ export async function initializeAuth() {
     }
 
     // If no session exists, try to sign up first
+    const { email, password } = getAppLogin();
     const { error: signUpError } = await supabase.auth.signUp({
-      email: 'tylerreedytlearning@gmail.com',
-      password: 'Rcia@0716!'
+      email,
+      password
     });
 
     // If sign up fails (likely because user exists), try to sign in
     if (signUpError) {
       const { error: signInError, data } = await supabase.auth.signInWithPassword({
-        email: 'tylerreedytlearning@gmail.com',
-        password: 'Rcia@0716!'
+        email,
+        password
       });
 
       if (signInError) {
